@@ -318,7 +318,23 @@ export default function App() {
   setCurrentScreen(0);
 
 };
+const clearSessions = () => {
 
+  const confirmed = window.confirm(
+    "Are you sure you want to clear all saved sessions?"
+  );
+
+  if (!confirmed) return;
+
+  localStorage.removeItem(
+    "bluezone-practice-sessions"
+  );
+
+  setSavedSessions([]);
+
+  alert("All saved sessions cleared.");
+
+};
   const exportToExcel = () => {
 
   const workbook =
@@ -391,7 +407,12 @@ export default function App() {
             >
               SAVE SESSION
             </button>
-
+            <button
+              onClick={clearSessions}
+              style={buttonStyle}
+          >
+            CLEAR SESSIONS
+            </button>
             <button
               onClick={exportToExcel}
               style={buttonStyle}
