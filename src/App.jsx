@@ -283,89 +283,90 @@ export default function App() {
 
   const saveSession = () => {
 
-    const session = {
-      id: Date.now(),
-      trainee:
-        sessionName || "Unnamed Trainee",
+  const session = {
 
-      timestamp:
-        new Date().toLocaleString(),
+    id: Date.now(),
 
-      responses: entries
-    };
+    trainee:
+      sessionName || "Unnamed Trainee",
 
-    const updated = [
-      ...savedSessions,
-      session
-    ];
+    timestamp:
+      new Date().toLocaleString(),
 
-    setSavedSessions(updated);
-
-    localStorage.setItem(
-      "bluezone-practice-sessions",
-      JSON.stringify(updated)
-    );
-
-    alert("Training session saved.");
+    responses: entries
 
   };
 
+  const updated = [
+    ...savedSessions,
+    session
+  ];
+
+  setSavedSessions(updated);
+
+  localStorage.setItem(
+    "bluezone-practice-sessions",
+    JSON.stringify(updated)
+  );
+
+  alert("Training session saved.");
+
+  // Clear all form entries
+  setEntries({});
+
+  // Return to first screen
+  setCurrentScreen(0);
+
+};
+
   const exportToExcel = () => {
+
+  const workbook =
+    XLSX.utils.book_new();
+
+  savedSessions.forEach((session, index) => {
 
     const rows = [];
 
-    Object.entries(entries).forEach(
-      ([screen, fields]) => {
+    Object.entries(session.responses)
+      .forEach(([screen, fields]) => {
 
-        Object.entries(fields).forEach(
-          ([field, value]) => {
+        Object.entries(fields)
+          .forEach(([field, value]) => {
 
             rows.push({
               Screen: screen,
               Field: field,
               Entry: value,
-              Timestamp:
-                new Date().toLocaleString()
+              Timestamp: session.timestamp,
+              Trainee: session.trainee
             });
 
-          }
-        );
+          });
 
-      }
-    );
+      });
 
     const worksheet =
       XLSX.utils.json_to_sheet(rows);
 
-    const workbook =
-      XLSX.utils.book_new();
+    const safeSheetName =
+      `${session.trainee}_${index + 1}`
+        .substring(0, 31);
 
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      "Training"
+      safeSheetName
     );
 
-    const excelBuffer =
-      XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array"
-      });
+  });
 
-    const blob = new Blob(
-      [excelBuffer],
-      {
-        type:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      }
-    );
+  XLSX.writeFile(
+    workbook,
+    "BlueZoneTrainingRecords.xlsx"
+  );
 
-    saveAs(
-      blob,
-      `training-session-${Date.now()}.xlsx`
-    );
-
-  };
+};
 
   const current =
     screens[currentScreen];
